@@ -4,6 +4,7 @@ Thumbs.db
 
 # Env & secrets
 .env
+src/.env
 .env.*
 
 # Python cache/bytecode
