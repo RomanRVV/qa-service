@@ -11,15 +11,17 @@ class DjangoSettings(BaseModel):
     DEBUG: bool = True
     ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost"]
 
-    model_config = ConfigDict(use_attribute_docstrings=True)
+    model_config = ConfigDict(
+        use_attribute_docstrings=True,
+        str_strip_whitespace=True,
+    )
 
 
 class EnvSettings(BaseSettings):
     DJANGO: DjangoSettings
-    DATABASE: PostgresDsn | None = None
+    DATABASE: PostgresDsn
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_nested_delimiter="__",
     )
-
