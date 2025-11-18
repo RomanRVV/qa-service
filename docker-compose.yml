@@ -1,0 +1,61 @@
+
+services:
+  db:
+    image: postgres:16
+    container_name: qa_backend_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: myproject
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U myuser -d myproject" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  django:
+    container_name: django_backend
+    build:
+      context: ./
+    env_file:
+      - .env
+    environment:
+      DJANGO__DEBUG: true
+      DJANGO__SECRET_KEY: test_key
+      DATABASE: postgresql://myuser:mypassword@db:5432/myproject
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_EMAIL: admin@example.com
+      DJANGO_SUPERUSER_PASSWORD: admin
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - .:/opt/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tests:
+    container_name: django_tests
+    build:
+      context: ./
+    env_file:
+      - .env
+    environment:
+      DJANGO__DEBUG: "true"
+      DJANGO__SECRET_KEY: test_key
+      DATABASE: postgresql://myuser:mypassword@db:5432/myproject
+    command: >
+      sh -c "python manage.py migrate &&
+             pytest"
+    volumes:
+      - .:/opt/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

@@ -22,6 +22,6 @@ class EnvSettings(BaseSettings):
     DATABASE: PostgresDsn
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file="../.env",
         env_nested_delimiter="__",
     )
